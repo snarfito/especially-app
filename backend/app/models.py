@@ -46,10 +46,10 @@ class Product(Base):
     store = relationship("StoreProfile")
 
 class OrderStatus(str, enum.Enum):
-    PENDING = "pendiente"
-    PROCESSING = "en proceso"
-    SHIPPED = "enviado"
-    COMPLETED = "completado"
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    SHIPPED = "SHIPPED"
+    COMPLETED = "COMPLETED"
 
 # Gestión de pedidos y estados de entrega
 class Order(Base):

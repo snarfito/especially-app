@@ -1,18 +1,26 @@
-# Framework web principal
-fastapi==0.109.0
+# ── Framework web principal ──────────────────────────────────────
+fastapi==0.115.6
 
-# Servidor ASGI para correr la app
-uvicorn==0.27.0
+# ── Servidor ASGI ────────────────────────────────────────────────
+uvicorn==0.32.1
 
-# ORM para interactuar con PostgreSQL
-sqlalchemy==2.0.25
+# ── ORM y base de datos ──────────────────────────────────────────
+sqlalchemy==2.0.36
+alembic==1.14.0
 
-# Driver de conexión para Postgres
-psycopg2-binary==2.9.9
+# ── Driver PostgreSQL (compatible con Python 3.13 en Apple Silicon)
+psycopg[binary]==3.2.4
 
-# Validación de datos y configuraciones
-pydantic==2.5.3
-pydantic-settings==2.1.0
+# ── Validación de datos ──────────────────────────────────────────
+pydantic==2.10.3
+pydantic-settings==2.6.1
 
-# Manejo de variables de entorno
-python-dotenv==1.0.0
+# ── Variables de entorno ─────────────────────────────────────────
+python-dotenv==1.0.1
+
+# ── Autenticación JWT ────────────────────────────────────────────
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# ── Subida de archivos ───────────────────────────────────────────
+python-multipart==0.0.12
