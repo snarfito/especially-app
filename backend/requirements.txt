@@ -1,0 +1,18 @@
+# Framework web principal
+fastapi==0.109.0
+
+# Servidor ASGI para correr la app
+uvicorn==0.27.0
+
+# ORM para interactuar con PostgreSQL
+sqlalchemy==2.0.25
+
+# Driver de conexión para Postgres
+psycopg2-binary==2.9.9
+
+# Validación de datos y configuraciones
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Manejo de variables de entorno
+python-dotenv==1.0.0

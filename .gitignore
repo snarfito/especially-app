@@ -1,0 +1,17 @@
+# Entornos virtuales
+venv/
+env/
+
+# Variables de entorno y secretos (¡NUNCA SUBIR ESTO!)
+.env
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Bases de datos locales (si las tuvieras en archivo)
+*.sqlite3
+
+# Cosas de Mac (por si acaso)
+.DS_Store

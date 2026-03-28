@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # Motor de base de datos PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: especially_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123 
+      POSTGRES_DB: especially_v1
+    ports:
+      - "5432:5432"
+    volumes:
+      - especially_data:/var/lib/postgresql/data
+
+  # Panel de administración visual (acceso en localhost:8080)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: especially_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: fredy.hortua@gmail.com 
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  especially_data:
