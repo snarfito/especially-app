@@ -125,10 +125,10 @@ class OrderCreate(BaseModel):
 class Order(BaseModel):
     order_id: UUID
     status: OrderStatus
-    shipping_type: ShippingType
+    shipping_type: Optional[ShippingType] = None
     total_amount: Decimal
     shipping_address: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
     items: List[OrderItem] = []
     model_config = ConfigDict(from_attributes=True)
 

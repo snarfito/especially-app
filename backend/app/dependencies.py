@@ -1,3 +1,4 @@
+# app/dependencies.py
 from typing import Optional
 from uuid import UUID
 
@@ -6,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from . import auth, crud, database, models, schemas
+from . import auth, crud, database, models
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -14,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def get_current_user(
     db: Session = Depends(database.get_db),
     token: str = Depends(oauth2_scheme),
-):
+) -> models.User:
     credentials_exception = HTTPException(
         status_code=401,
         detail="No se pudo validar el token",
@@ -61,18 +62,9 @@ def get_product_or_404(
     db: Session = Depends(database.get_db),
 ) -> models.Product:
     product = crud.get_product_by_id(db, product_id)
-
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
-
     return product
-
-
-def get_order_product(
-    order_data: schemas.OrderCreate,
-    db: Session = Depends(database.get_db),
-) -> models.Product:
-    return get_product_or_404(order_data.product_id, db)
 
 
 def get_owned_product(
@@ -81,13 +73,11 @@ def get_owned_product(
     current_store: models.StoreProfile = Depends(require_store_owner),
 ) -> models.Product:
     product = get_product_or_404(product_id, db)
-
     if product.store_id != current_store.store_id:
         raise HTTPException(
             status_code=403,
             detail="No tienes permiso para acceder a este producto",
         )
-
     return product
 
 
@@ -106,6 +96,7 @@ def get_assigned_order(
     order: models.Order = Depends(get_order_or_404),
     current_store: models.StoreProfile = Depends(require_store_owner),
 ) -> models.Order:
+    """Verifica que el pedido esté asignado al socio autenticado."""
     if order.seller_id != current_store.user_id:
         raise HTTPException(
             status_code=403,

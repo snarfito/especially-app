@@ -1,3 +1,5 @@
+# app/crud.py
+from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
@@ -5,6 +7,9 @@ from sqlalchemy.orm import Session
 
 from . import models, schemas
 from .auth import get_password_hash
+
+
+# ─── USUARIOS ─────────────────────────────────────────────────────────────────
 
 def get_user_by_email(db: Session, email: str) -> Optional[models.User]:
     return db.query(models.User).filter(models.User.email == email).first()
@@ -28,6 +33,8 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     return db_user
 
 
+# ─── TIENDAS ──────────────────────────────────────────────────────────────────
+
 def create_store(
     db: Session,
     store_data: schemas.StoreProfileBase,
@@ -48,6 +55,8 @@ def get_store_by_user(db: Session, user_id: UUID) -> Optional[models.StoreProfil
         models.StoreProfile.user_id == user_id
     ).first()
 
+
+# ─── PRODUCTOS ────────────────────────────────────────────────────────────────
 
 def get_products(
     db: Session,
@@ -99,25 +108,54 @@ def delete_product(db: Session, product: models.Product) -> None:
     db.commit()
 
 
+# ─── PEDIDOS ──────────────────────────────────────────────────────────────────
+
 def create_order(
     db: Session,
     order_data: schemas.OrderCreate,
     buyer_id: UUID,
-    product: models.Product,
 ) -> models.Order:
-    total = product.base_price * order_data.quantity
+    """
+    Crea una orden con sus items. Calcula el total sumando
+    base_price * quantity de cada producto en la DB (nunca confía en el cliente).
+    """
+    total = Decimal("0")
+    items_to_create = []
+
+    for item_data in order_data.items:
+        product = get_product_by_id(db, item_data.product_id)
+        if not product:
+            raise ValueError(f"Producto {item_data.product_id} no encontrado")
+
+        unit_price = product.base_price
+        total += unit_price * item_data.quantity
+
+        items_to_create.append(models.OrderItem(
+            product_id=item_data.product_id,
+            design_id=item_data.design_id,
+            quantity=item_data.quantity,
+            unit_price=unit_price,
+            size=item_data.size,
+            garment_color=item_data.garment_color,
+        ))
 
     db_order = models.Order(
         buyer_id=buyer_id,
         seller_id=None,
-        product_id=product.product_id,
-        quantity=order_data.quantity,
-        total_price=total,
-        custom_text=order_data.custom_text,
-        custom_image_url=order_data.custom_image_url,
+        status=models.OrderStatus.PENDING,
+        shipping_type=order_data.shipping_type,
+        total_amount=total,
+        shipping_address=order_data.shipping_address,
     )
     db.add(db_order)
+    db.flush()  # genera order_id sin commit para asociar los items
+
+    for item in items_to_create:
+        item.order_id = db_order.order_id
+        db.add(item)
+
     db.commit()
+    db.expire(db_order)  # fuerza releer created_at generado por el servidor
     db.refresh(db_order)
     return db_order
 
@@ -157,7 +195,7 @@ def assign_order_to_seller(
     seller_id: UUID,
 ) -> models.Order:
     order.seller_id = seller_id
-    order.status = models.OrderStatus.PROCESSING
+    order.status = models.OrderStatus.ACCEPTED
     db.commit()
     db.refresh(order)
     return order
@@ -172,3 +210,33 @@ def update_order_status(
     db.commit()
     db.refresh(order)
     return order
+
+
+# ─── DISEÑOS PERSONALIZADOS ───────────────────────────────────────────────────
+
+def create_custom_design(
+    db: Session,
+    design_data: schemas.CustomDesignCreate,
+    user_id: UUID,
+) -> models.CustomDesign:
+    db_design = models.CustomDesign(
+        user_id=user_id,
+        canvas_json=design_data.canvas_json,
+        preview_image_url=design_data.preview_image_url,
+    )
+    db.add(db_design)
+    db.commit()
+    db.refresh(db_design)
+    return db_design
+
+
+def get_designs_by_user(
+    db: Session,
+    user_id: UUID,
+) -> List[models.CustomDesign]:
+    return (
+        db.query(models.CustomDesign)
+        .filter(models.CustomDesign.user_id == user_id)
+        .order_by(models.CustomDesign.created_at.desc())
+        .all()
+    )
