@@ -5,7 +5,9 @@ from uuid import uuid4
 from fastapi import HTTPException
 
 from app.dependencies import (
+    get_assigned_order,
     get_owned_product,
+    get_order_or_404,
     get_product_or_404,
     require_store_owner,
     require_user_without_store,
@@ -24,10 +26,13 @@ class FakeQuery:
 
 
 class FakeDB:
-    def __init__(self, product=None):
+    def __init__(self, product=None, order=None):
         self.product = product
+        self.order = order
 
-    def query(self, _model):
+    def query(self, model):
+        if getattr(model, "__tablename__", None) == "orders":
+            return FakeQuery(self.order)
         return FakeQuery(self.product)
 
 
@@ -84,6 +89,32 @@ class AuthorizationTests(unittest.TestCase):
         result = get_product_or_404(product.product_id, db)
 
         self.assertIs(result, product)
+
+    def test_get_order_or_404_returns_404_when_missing(self):
+        db = FakeDB(order=None)
+
+        with self.assertRaises(HTTPException) as context:
+            get_order_or_404(uuid4(), db)
+
+        self.assertEqual(context.exception.status_code, 404)
+
+    def test_get_assigned_order_rejects_other_store_owner(self):
+        store = SimpleNamespace(user_id=uuid4())
+        order = SimpleNamespace(order_id=uuid4(), seller_id=uuid4())
+
+        with self.assertRaises(HTTPException) as context:
+            get_assigned_order(order.order_id, order, store)
+
+        self.assertEqual(context.exception.status_code, 403)
+
+    def test_get_assigned_order_accepts_assigned_store_owner(self):
+        owner_id = uuid4()
+        store = SimpleNamespace(user_id=owner_id)
+        order = SimpleNamespace(order_id=uuid4(), seller_id=owner_id)
+
+        result = get_assigned_order(order.order_id, order, store)
+
+        self.assertIs(result, order)
 
 
 if __name__ == "__main__":

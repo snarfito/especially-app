@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
@@ -5,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from . import auth, database, models, schemas
+from . import auth, crud, database, models, schemas
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -21,13 +22,13 @@ def get_current_user(
     )
     try:
         payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
-        email: str = payload.get("sub")
+        email: Optional[str] = payload.get("sub")
         if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    user = db.query(models.User).filter(models.User.email == email).first()
+    user = crud.get_user_by_email(db, email)
     if user is None:
         raise credentials_exception
     return user
@@ -59,9 +60,7 @@ def get_product_or_404(
     product_id: UUID,
     db: Session = Depends(database.get_db),
 ) -> models.Product:
-    product = db.query(models.Product).filter(
-        models.Product.product_id == product_id
-    ).first()
+    product = crud.get_product_by_id(db, product_id)
 
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -90,3 +89,26 @@ def get_owned_product(
         )
 
     return product
+
+
+def get_order_or_404(
+    order_id: UUID,
+    db: Session = Depends(database.get_db),
+) -> models.Order:
+    order = crud.get_order_by_id(db, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+    return order
+
+
+def get_assigned_order(
+    order_id: UUID,
+    order: models.Order = Depends(get_order_or_404),
+    current_store: models.StoreProfile = Depends(require_store_owner),
+) -> models.Order:
+    if order.seller_id != current_store.user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="No tienes permiso para gestionar este pedido",
+        )
+    return order

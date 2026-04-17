@@ -1,4 +1,3 @@
-# app/auth.py
 import os
 from dotenv import load_dotenv 
 from datetime import datetime, timedelta
@@ -6,30 +5,22 @@ from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-
-# Configuración de cifrado para contraseñas (Hashing)
-# El algoritmo bcrypt es el estándar para evitar ataques de fuerza bruta
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Cargar variables de entorno desde el archivo .env
 load_dotenv()
-
-# Configuración del Token JWT
-# IMPORTANTE: En producción, esto debe ir en una variable de entorno (.env)
-SECRET_KEY = os.getenv("SECRET_KEY")  # Valor por defecto para desarrollo
-ALGORITHM = os.getenv("ALGORITHM")  # Algoritmo de firma para JWT, HS256 es común y seguro
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")) 
 
 def verify_password(plain_password, hashed_password):
-    """Compara una contraseña en texto plano con su versión cifrada"""
+    """Valida una contraseña en texto plano contra el hash almacenado."""
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
-    """Genera un hash seguro para almacenar en la base de datos"""
+    """Genera el hash de una contraseña en texto plano."""
     return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """Genera el token firmado que se enviará al cliente"""
+    """Genera un JWT firmado a partir del payload recibido."""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
