@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .database import get_db
-from .routers import auth, orders, products, stores
+from .routers import auth, designs, images, orders, products, stores
 
 app = FastAPI(
     title="Especially API",
@@ -29,7 +29,9 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(stores.router)
 app.include_router(products.router)
+app.include_router(images.router)
 app.include_router(orders.router)
+app.include_router(designs.router)
 
 @app.get("/", tags=["General"])
 def read_root():

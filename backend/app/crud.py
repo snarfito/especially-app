@@ -230,6 +230,12 @@ def create_custom_design(
     return db_design
 
 
+def get_design_by_id(db: Session, design_id: UUID) -> Optional[models.CustomDesign]:
+    return db.query(models.CustomDesign).filter(
+        models.CustomDesign.design_id == design_id
+    ).first()
+
+
 def get_designs_by_user(
     db: Session,
     user_id: UUID,
@@ -240,3 +246,53 @@ def get_designs_by_user(
         .order_by(models.CustomDesign.created_at.desc())
         .all()
     )
+
+
+def delete_custom_design(db: Session, design: models.CustomDesign) -> None:
+    db.delete(design)
+    db.commit()
+
+
+# ─── IMÁGENES DE PRODUCTO ─────────────────────────────────────────────────────
+
+def create_product_image(
+    db: Session,
+    image_data: schemas.ProductImageCreate,
+    product_id: UUID,
+) -> models.ProductImage:
+    db_image = models.ProductImage(
+        product_id=product_id,
+        url=image_data.url,
+        view_type=image_data.view_type,
+        display_order=image_data.display_order,
+    )
+    db.add(db_image)
+    db.commit()
+    db.refresh(db_image)
+    return db_image
+
+
+def get_product_images(
+    db: Session,
+    product_id: UUID,
+) -> List[models.ProductImage]:
+    return (
+        db.query(models.ProductImage)
+        .filter(models.ProductImage.product_id == product_id)
+        .order_by(models.ProductImage.display_order)
+        .all()
+    )
+
+
+def get_product_image_by_id(
+    db: Session,
+    image_id: UUID,
+) -> Optional[models.ProductImage]:
+    return db.query(models.ProductImage).filter(
+        models.ProductImage.image_id == image_id
+    ).first()
+
+
+def delete_product_image(db: Session, image: models.ProductImage) -> None:
+    db.delete(image)
+    db.commit()
