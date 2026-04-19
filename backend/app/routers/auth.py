@@ -1,3 +1,14 @@
+"""
+Especially API — Router de autenticación y gestión de usuarios.
+
+Endpoints:
+  POST /token      → Genera un JWT (flujo OAuth2 password).
+  POST /users      → Registro de nueva cuenta.
+  GET  /users/me   → Perfil del usuario autenticado.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException

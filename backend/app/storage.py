@@ -1,7 +1,13 @@
 # app/storage.py
 """
-Cliente de Cloudflare R2 usando boto3 (compatible con S3).
-Centraliza todas las operaciones de almacenamiento de archivos.
+Especially API — Cliente de almacenamiento Cloudflare R2.
+
+Usa boto3 con la API compatible S3 de R2. Centraliza todas las operaciones
+de subida y eliminación de archivos (imágenes de productos, miniaturas de
+diseños, PDFs de especificaciones).
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
 """
 import os
 import uuid

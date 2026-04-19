@@ -1,3 +1,18 @@
+"""
+Especially API — Modelos ORM (SQLAlchemy).
+
+Define las tablas de la base de datos y sus relaciones:
+  - User              → comprador, vendedor o diseñador.
+  - StoreProfile      → perfil comercial de un socio productor.
+  - Product           → artículo del marketplace (personalizable o artesanía).
+  - ProductImage      → fotografías de un producto por vista (frente, espalda, etc.).
+  - CustomDesign      → estado del canvas de Fabric.js guardado por un comprador.
+  - Order             → pedido con campos de pago Wompi y URL del PDF de especificaciones.
+  - OrderItem         → línea de detalle: producto + diseño personalizado.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 # app/models.py
 import enum
 import uuid
@@ -21,6 +36,12 @@ class OrderStatus(str, enum.Enum):
     SHIPPED   = "enviado"
     DELIVERED = "entregado"
     CANCELLED = "cancelado"
+
+class PaymentStatus(str, enum.Enum):
+    PENDING     = "pendiente"     # orden creada, aún sin pagar
+    PAID        = "pagado"        # Wompi confirmó APPROVED
+    FAILED      = "pago_fallido"  # DECLINED | VOIDED | ERROR
+    REFUNDED    = "reembolsado"
 
 class ShippingType(str, enum.Enum):
     NORMAL = "normal"
@@ -123,14 +144,19 @@ class CustomDesign(Base):
 class Order(Base):
     __tablename__ = "orders"
 
-    order_id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    buyer_id         = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=False)
-    seller_id        = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=True)
-    status           = Column(Enum(OrderStatus, values_callable=lambda x: [e.value for e in x]), default=OrderStatus.PENDING, nullable=False)
-    shipping_type    = Column(Enum(ShippingType, values_callable=lambda x: [e.value for e in x]), default=ShippingType.NORMAL)
-    total_amount     = Column(Numeric(12, 2), nullable=False)
-    shipping_address = Column(Text, nullable=False)
-    created_at       = Column(DateTime(timezone=True), server_default=func.now())
+    order_id               = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    buyer_id               = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=False)
+    seller_id              = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=True)
+    status                 = Column(Enum(OrderStatus, values_callable=lambda x: [e.value for e in x]), default=OrderStatus.PENDING, nullable=False)
+    shipping_type          = Column(Enum(ShippingType, values_callable=lambda x: [e.value for e in x]), default=ShippingType.NORMAL)
+    total_amount           = Column(Numeric(12, 2), nullable=False)
+    shipping_address       = Column(Text, nullable=False)
+    created_at             = Column(DateTime(timezone=True), server_default=func.now())
+    # ── Campos de pago Wompi ────────────────────────────────────────────────
+    payment_reference      = Column(String(100), unique=True, nullable=True, index=True)  # referencia única enviada a Wompi
+    payment_status         = Column(String(20), default="pendiente", nullable=False)       # pendiente | pagado | pago_fallido
+    wompi_transaction_id   = Column(String(100), nullable=True)                            # ID de transacción devuelto por Wompi
+    spec_pdf_url           = Column(String, nullable=True)                                   # URL del PDF de especificaciones en R2
 
     # Relaciones
     buyer  = relationship("User", foreign_keys=[buyer_id], back_populates="orders_as_buyer")

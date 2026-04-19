@@ -1,3 +1,16 @@
+"""
+Especially API — Router del marketplace de productos.
+
+Endpoints:
+  GET    /products            → Listado paginado (filtro opcional por categoría).
+  GET    /products/{id}       → Detalle de un producto.
+  POST   /products            → Crea producto (requiere tienda activa).
+  PUT    /products/{id}       → Actualiza producto propio.
+  DELETE /products/{id}       → Elimina producto propio.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 from typing import List, Optional
 from uuid import UUID
 

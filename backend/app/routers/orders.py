@@ -1,7 +1,22 @@
+"""
+Especially API — Router de pedidos.
+
+Endpoints:
+  POST /orders                      → Crea pedido (comprador).
+  GET  /orders/my-orders            → Pedidos del comprador autenticado.
+  GET  /orders/available            → Pedidos pendientes sin socio asignado.
+  POST /orders/{id}/accept          → Socio acepta un pedido.
+  PUT  /orders/{id}/status          → Socio actualiza estado del pedido.
+  POST /orders/{id}/spec-pdf        → Genera y sube el PDF de especificaciones a R2.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 # app/routers/orders.py
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -14,6 +29,8 @@ from ..dependencies import (
     require_store_owner,
 )
 from ..models import Order, OrderStatus, StoreProfile, User
+from ..pdf_generator import generate_spec_pdf
+from ..storage import upload_file
 
 router = APIRouter(prefix="/orders", tags=["Pedidos"])
 
@@ -80,3 +97,38 @@ def update_order_status(
 ):
     """El socio asignado actualiza el estado de su pedido."""
     return crud.update_order_status(db, order, status_update.status)
+
+
+@router.post("/{order_id}/spec-pdf", response_model=schemas.Order)
+def generate_order_spec_pdf(
+    db: Session = Depends(get_db),
+    current_store: StoreProfile = Depends(require_store_owner),
+    order: Order = Depends(get_assigned_order),
+):
+    """
+    Genera el PDF de especificaciones para el socio productor,
+    lo sube a R2 en la carpeta specs/ y guarda la URL en la orden.
+    Solo el socio asignado puede generarlo.
+    """
+    try:
+        pdf_bytes = generate_spec_pdf(order)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Error generando PDF: {exc}")
+
+    order_id_short = str(order.order_id)[:8].upper()
+    filename = f"ESP-{order_id_short}.pdf"
+
+    try:
+        pdf_url = upload_file(
+            file_bytes=pdf_bytes,
+            content_type="application/pdf",
+            folder="specs",
+            filename=filename,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Error subiendo PDF a R2: {exc}")
+
+    order.spec_pdf_url = pdf_url
+    db.commit()
+    db.refresh(order)
+    return order

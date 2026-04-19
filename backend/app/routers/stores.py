@@ -1,3 +1,12 @@
+"""
+Especially API — Router de tiendas / perfiles comerciales.
+
+Endpoints:
+  POST /store   → Crea el perfil de marca del socio autenticado.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -7,6 +16,7 @@ from ..dependencies import require_user_without_store
 from ..models import User
 
 router = APIRouter(prefix="/store", tags=["Socios"])
+
 
 @router.post("", response_model=schemas.StoreProfile, status_code=201)
 def create_store(

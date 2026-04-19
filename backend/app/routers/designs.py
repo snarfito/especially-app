@@ -1,3 +1,15 @@
+"""
+Especially API — Router de diseños personalizados.
+
+Endpoints:
+  POST   /designs              → Guarda el canvas de Fabric.js del usuario.
+  GET    /designs/my-designs   → Lista los diseños del usuario autenticado.
+  GET    /designs/{id}         → Obtiene un diseño (solo el propietario).
+  DELETE /designs/{id}         → Elimina un diseño (solo el propietario).
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 # app/routers/designs.py
 from uuid import UUID
 

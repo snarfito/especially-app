@@ -1,3 +1,14 @@
+"""
+Especially API — Dependencias reutilizables de FastAPI.
+
+Provee funciones de dependencia (``Depends``) que encapsulan:
+  - Autenticación: extracción y validación del JWT Bearer.
+  - Autorización: verificación de roles y propiedad de recursos.
+  - Atajos 404: resolución de entidades o excepción inmediata.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 # app/dependencies.py
 from typing import Optional
 from uuid import UUID

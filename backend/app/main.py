@@ -1,11 +1,22 @@
-"""Punto de entrada de la aplicación FastAPI."""
+"""
+Especially API — Punto de entrada de la aplicación FastAPI.
+
+Responsabilidades:
+  - Instancia y configura la aplicación FastAPI.
+  - Registra el middleware CORS para el cliente web/móvil.
+  - Monta todos los routers del dominio (auth, stores, products, images, orders, designs, payments).
+  - Expone los endpoints raíz ('/') y de salud ('/healthcheck').
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .database import get_db
-from .routers import auth, designs, images, orders, products, stores
+from .routers import auth, designs, images, orders, payments, products, stores
 
 app = FastAPI(
     title="Especially API",
@@ -32,6 +43,7 @@ app.include_router(products.router)
 app.include_router(images.router)
 app.include_router(orders.router)
 app.include_router(designs.router)
+app.include_router(payments.router)
 
 @app.get("/", tags=["General"])
 def read_root():

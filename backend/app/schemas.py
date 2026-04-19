@@ -1,3 +1,18 @@
+"""
+Especially API — Esquemas Pydantic (validación y serialización).
+
+Cada grupo de esquemas sigue el patrón Base / Create / Update / Response:
+  - *Base*   → campos compartidos entre creación y respuesta.
+  - *Create* → payload que el cliente envía al crear un recurso.
+  - *Update* → payload para actualizaciones parciales (todos los campos opcionales).
+  - Sin sufijo → esquema de respuesta (incluye IDs y timestamps).
+
+Grupos definidos:
+  StoreProfile, ProductImage, Product, User, Token, CustomDesign, Order / OrderItem.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 # app/schemas.py
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
@@ -130,6 +145,11 @@ class Order(BaseModel):
     shipping_address: str
     created_at: Optional[datetime] = None
     items: List[OrderItem] = []
+    # Campos de pago
+    payment_reference: Optional[str] = None
+    payment_status: str = "pendiente"
+    wompi_transaction_id: Optional[str] = None
+    spec_pdf_url: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class OrderStatusUpdate(BaseModel):
