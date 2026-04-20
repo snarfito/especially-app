@@ -1,28 +1,24 @@
 /**
- * Especially Frontend — Componente Navbar.
- *
- * Barra de navegación principal. Muestra links según el rol del usuario.
- * Se adapta entre sesión iniciada y no iniciada.
- *
- * Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
- * Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+ * Especially Frontend — Navbar.
+ * Estilo alineado con AI Studio: fondo blanco, borde sutil, logo jade profundo.
  */
 
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { getCurrentUser, logout } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import type { User } from "@/types";
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     setUser(getCurrentUser());
-  }, []);
+  }, [pathname]);
 
   function handleLogout() {
     logout();
@@ -30,47 +26,75 @@ export default function Navbar() {
     router.push("/login");
   }
 
+  const isSeller = user?.user_role === "seller" || user?.user_role === "socio_productor";
+
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+    <nav className="bg-white border-b border-gray-200 px-8 py-0 flex items-center justify-between h-14 sticky top-0 z-40">
       {/* Logo */}
-      <Link href="/" className="text-xl font-bold text-jade-600 tracking-tight">
+      <Link
+        href="/"
+        className="text-xl font-bold tracking-tight"
+        style={{ color: "#2E7D60" }}
+      >
         Especially
       </Link>
 
       {/* Links centrales */}
-      <div className="flex gap-6 text-sm font-medium text-gray-600">
-        <Link href="/catalogo" className="hover:text-jade-600 transition-colors">
+      <div className="flex gap-8 text-sm font-medium text-gray-500">
+        <Link
+          href="/catalogo"
+          className="py-4 border-b-2 transition-colors hover:text-gray-900"
+          style={{
+            borderColor: pathname === "/catalogo" ? "#2E7D60" : "transparent",
+            color: pathname === "/catalogo" ? "#2E7D60" : undefined,
+          }}
+        >
           Catálogo
         </Link>
-        {user?.role === "socio_productor" && (
-          <Link href="/dashboard" className="hover:text-jade-600 transition-colors">
+        {isSeller && (
+          <Link
+            href="/dashboard"
+            className="py-4 border-b-2 transition-colors hover:text-gray-900"
+            style={{
+              borderColor: pathname === "/dashboard" ? "#2E7D60" : "transparent",
+              color: pathname === "/dashboard" ? "#2E7D60" : undefined,
+            }}
+          >
             Dashboard
           </Link>
         )}
       </div>
 
       {/* Auth */}
-      <div className="flex items-center gap-4 text-sm">
+      <div className="flex items-center gap-3 text-sm">
         {user ? (
           <>
-            <span className="text-gray-500">Hola, {user.full_name.split(" ")[0]}</span>
+            <span className="text-gray-400 text-xs">
+              {user.full_name.split(" ")[0]}
+            </span>
             <button
               onClick={handleLogout}
-              className="text-gray-600 hover:text-red-500 transition-colors"
+              className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-full hover:border-gray-400 hover:text-gray-800 transition-colors"
             >
               Salir
             </button>
           </>
         ) : (
           <>
-            <Link href="/login" className="text-gray-600 hover:text-jade-600 transition-colors">
+            <Link
+              href="/login"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
               Ingresar
             </Link>
             <Link
               href="/registro"
-              className="bg-jade-500 text-white px-4 py-1.5 rounded-full hover:bg-jade-600 transition-colors"
+              className="text-sm text-white px-4 py-1.5 rounded-full font-medium transition-colors"
+              style={{ backgroundColor: "#2E7D60" }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#1C5241")}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#2E7D60")}
             >
-              Registrarse
+              Crear cuenta
             </Link>
           </>
         )}

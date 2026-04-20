@@ -1,12 +1,5 @@
 /**
- * Especially Frontend — Página de Login.
- *
- * Formulario de autenticación. Redirige según el rol del usuario:
- * - socio_productor → /dashboard
- * - comprador / disenador → /catalogo
- *
- * Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
- * Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+ * Especially Frontend — Login.
  */
 
 "use client";
@@ -16,12 +9,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/lib/auth";
 
+const JADE = "#2E7D60";
+const JADE_DARK = "#1C5241";
+
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,7 +25,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await login({ email, password });
-      if (data.user.user_role === "socio_productor" || data.user.user_role === "seller") {
+      if (data.user.user_role === "seller" || data.user.user_role === "socio_productor") {
         router.push("/dashboard");
       } else {
         router.push("/catalogo");
@@ -42,54 +38,77 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex justify-center items-start py-16">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Ingresar</h1>
-        <p className="text-sm text-gray-500 mb-6">Bienvenido de nuevo a Especially</p>
+    <div className="flex justify-center items-start py-20">
+      <div
+        className="bg-white rounded-2xl p-8 w-full max-w-sm"
+        style={{ border: "1px solid #E5E7EB" }}
+      >
+        <h1 className="text-2xl font-bold mb-1" style={{ color: "#0F1F19" }}>
+          Ingresar
+        </h1>
+        <p className="text-sm mb-7" style={{ color: "#9CA3AF" }}>
+          Bienvenido de nuevo a Especially
+        </p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-4">
+          <div
+            className="text-xs rounded-xl px-4 py-3 mb-5"
+            style={{ backgroundColor: "#FEF2F2", color: "#DC2626", border: "1px solid #FCA5A5" }}
+          >
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium" style={{ color: "#374151" }}>
+              Correo electrónico
+            </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jade-400"
               placeholder="tu@correo.com"
+              className="w-full px-3 py-2.5 text-sm rounded-xl outline-none transition-colors"
+              style={{ border: "1.5px solid #E5E7EB", backgroundColor: "#FAFAFA" }}
+              onFocus={e => (e.target.style.borderColor = JADE)}
+              onBlur={e => (e.target.style.borderColor = "#E5E7EB")}
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium" style={{ color: "#374151" }}>
+              Contraseña
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
               placeholder="••••••••"
+              className="w-full px-3 py-2.5 text-sm rounded-xl outline-none transition-colors"
+              style={{ border: "1.5px solid #E5E7EB", backgroundColor: "#FAFAFA" }}
+              onFocus={e => (e.target.style.borderColor = JADE)}
+              onBlur={e => (e.target.style.borderColor = "#E5E7EB")}
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-jade-500 text-white py-2.5 rounded-full font-medium hover:bg-jade-600 transition-colors disabled:opacity-60 mt-2"
+            className="mt-1 py-2.5 rounded-full text-sm font-semibold text-white transition-colors disabled:opacity-60"
+            style={{ backgroundColor: loading ? "#7DCCA8" : JADE }}
+            onMouseEnter={e => !loading && (e.currentTarget.style.backgroundColor = JADE_DARK)}
+            onMouseLeave={e => !loading && (e.currentTarget.style.backgroundColor = JADE)}
           >
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
 
-        <p className="text-sm text-gray-500 text-center mt-6">
+        <p className="text-xs text-center mt-6" style={{ color: "#9CA3AF" }}>
           ¿No tienes cuenta?{" "}
-          <Link href="/registro" className="text-orange-500 font-medium hover:underline">
+          <Link href="/registro" className="font-semibold" style={{ color: JADE }}>
             Regístrate
           </Link>
         </p>

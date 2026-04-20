@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAF8F4;
+  --foreground: #0F1F19;
 }
 
 @theme inline {
@@ -11,28 +11,26 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* ── Paleta Especially — Verde Jade ── */
-  --color-jade-50:  #edfaf4;
-  --color-jade-100: #d3f3e4;
-  --color-jade-200: #aae6cb;
-  --color-jade-300: #72d1aa;
-  --color-jade-400: #3cb585;
-  --color-jade-500: #1a9a6c;
-  --color-jade-600: #107a54;
-  --color-jade-700: #0d6144;
-  --color-jade-800: #0b4d37;
-  --color-jade-900: #09402e;
-}
+  /* ── Paleta Especially — Verde Jade (alineada con AI Studio) ── */
+  --color-jade-50:  #F2FAF6;
+  --color-jade-100: #E6F4EE;
+  --color-jade-200: #B5E4CE;
+  --color-jade-300: #7DCCA8;
+  --color-jade-400: #3D9970;
+  --color-jade-500: #2E7D60;
+  --color-jade-600: #1C5241;
+  --color-jade-700: #0F2E25;
+  --color-jade-800: #091F1A;
+  --color-jade-900: #050F0D;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* ── Cream / neutros cálidos ── */
+  --color-cream:    #FAF8F4;
+  --color-cream-dark: #F0EDE7;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }

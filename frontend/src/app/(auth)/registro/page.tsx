@@ -1,12 +1,5 @@
 /**
- * Especially Frontend — Página de Registro.
- *
- * Formulario de creación de cuenta con selección de rol:
- * - Comprador
- * - Socio Productor
- *
- * Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
- * Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+ * Especially Frontend — Registro.
  */
 
 "use client";
@@ -17,14 +10,18 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { login } from "@/lib/auth";
 
+const JADE = "#2E7D60";
+const JADE_DARK = "#1C5241";
+const JADE_LIGHT = "#E6F4EE";
+
 export default function RegistroPage() {
   const router = useRouter();
-  const [fullName, setFullName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState<"buyer" | "seller">("buyer");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,68 +43,97 @@ export default function RegistroPage() {
   }
 
   return (
-    <div className="flex justify-center items-start py-16">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Crear cuenta</h1>
-        <p className="text-sm text-gray-500 mb-6">Únete a Especially</p>
+    <div className="flex justify-center items-start py-20">
+      <div
+        className="bg-white rounded-2xl p-8 w-full max-w-sm"
+        style={{ border: "1px solid #E5E7EB" }}
+      >
+        <h1 className="text-2xl font-bold mb-1" style={{ color: "#0F1F19" }}>
+          Crear cuenta
+        </h1>
+        <p className="text-sm mb-7" style={{ color: "#9CA3AF" }}>
+          Únete a Especially
+        </p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3 mb-4">
+          <div
+            className="text-xs rounded-xl px-4 py-3 mb-5"
+            style={{ backgroundColor: "#FEF2F2", color: "#DC2626", border: "1px solid #FCA5A5" }}
+          >
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium" style={{ color: "#374151" }}>
+              Nombre completo
+            </label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-jade-400"
               placeholder="Tu nombre"
+              className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+              style={{ border: "1.5px solid #E5E7EB", backgroundColor: "#FAFAFA" }}
+              onFocus={e => (e.target.style.borderColor = JADE)}
+              onBlur={e => (e.target.style.borderColor = "#E5E7EB")}
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium" style={{ color: "#374151" }}>
+              Correo electrónico
+            </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
               placeholder="tu@correo.com"
+              className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+              style={{ border: "1.5px solid #E5E7EB", backgroundColor: "#FAFAFA" }}
+              onFocus={e => (e.target.style.borderColor = JADE)}
+              onBlur={e => (e.target.style.borderColor = "#E5E7EB")}
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium" style={{ color: "#374151" }}>
+              Contraseña
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
               placeholder="Mínimo 8 caracteres"
+              className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+              style={{ border: "1.5px solid #E5E7EB", backgroundColor: "#FAFAFA" }}
+              onFocus={e => (e.target.style.borderColor = JADE)}
+              onBlur={e => (e.target.style.borderColor = "#E5E7EB")}
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Soy...</label>
-            <div className="flex gap-3">
+          {/* Rol */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-medium" style={{ color: "#374151" }}>
+              Soy...
+            </label>
+            <div className="flex gap-2">
               {(["buyer", "seller"] as const).map((r) => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => setRole(r)}
-                  className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                    role === r
-                      ? "border-jade-500 bg-jade-50 text-jade-600"
-                      : "border-gray-300 text-gray-600 hover:border-jade-300"
-                  }`}
+                  className="flex-1 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    border: `1.5px solid ${role === r ? JADE : "#E5E7EB"}`,
+                    backgroundColor: role === r ? JADE_LIGHT : "white",
+                    color: role === r ? JADE_DARK : "#6B7280",
+                  }}
                 >
                   {r === "buyer" ? "Comprador" : "Socio Productor"}
                 </button>
@@ -118,15 +144,18 @@ export default function RegistroPage() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-jade-500 text-white py-2.5 rounded-full font-medium hover:bg-jade-600 transition-colors disabled:opacity-60 mt-2"
+            className="mt-1 py-2.5 rounded-full text-sm font-semibold text-white transition-colors disabled:opacity-60"
+            style={{ backgroundColor: loading ? "#7DCCA8" : JADE }}
+            onMouseEnter={e => !loading && (e.currentTarget.style.backgroundColor = JADE_DARK)}
+            onMouseLeave={e => !loading && (e.currentTarget.style.backgroundColor = JADE)}
           >
             {loading ? "Creando cuenta..." : "Crear cuenta"}
           </button>
         </form>
 
-        <p className="text-sm text-gray-500 text-center mt-6">
+        <p className="text-xs text-center mt-6" style={{ color: "#9CA3AF" }}>
           ¿Ya tienes cuenta?{" "}
-          <Link href="/login" className="text-jade-600 font-medium hover:underline">
+          <Link href="/login" className="font-semibold" style={{ color: JADE }}>
             Ingresar
           </Link>
         </p>

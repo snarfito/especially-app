@@ -26,9 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${geist.className} bg-gray-50 min-h-screen`}>
+      <body className={`${geist.className} min-h-screen`} style={{ backgroundColor: '#FAF8F4', color: '#0F1F19' }}>
         <Navbar />
-        <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
+        <main className="max-w-7xl mx-auto px-6 py-10">{children}</main>
       </body>
     </html>
   );

@@ -1,31 +1,41 @@
 /**
  * Especially Frontend — Página de inicio.
- *
- * Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
- * Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
  */
 
 import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center gap-6">
-      <h1 className="text-5xl font-bold text-gray-900">
-        Personaliza lo que <span className="text-jade-600">usas</span>
-      </h1>
-      <p className="text-lg text-gray-500 max-w-xl">
-        Crea productos únicos con tus diseños o descubre artesanías auténticas colombianas.
-      </p>
-      <div className="flex gap-4 mt-4">
+    <div className="flex flex-col items-center justify-center py-32 text-center gap-8">
+      <div className="flex flex-col items-center gap-4">
+        <span
+          className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full"
+          style={{ backgroundColor: "#E6F4EE", color: "#1C5241" }}
+        >
+          Marketplace colombiano
+        </span>
+        <h1 className="text-5xl font-bold leading-tight" style={{ color: "#0F1F19" }}>
+          Personaliza lo que{" "}
+          <span style={{ color: "#2E7D60" }}>usas</span>
+        </h1>
+        <p className="text-lg max-w-lg leading-relaxed" style={{ color: "#6B7280" }}>
+          Crea productos únicos con tus diseños o descubre artesanías
+          auténticas colombianas.
+        </p>
+      </div>
+
+      <div className="flex gap-3 mt-2">
         <Link
           href="/catalogo"
-          className="bg-jade-500 text-white px-6 py-3 rounded-full font-medium hover:bg-jade-600 transition-colors"
+          className="px-6 py-3 rounded-full font-semibold text-sm text-white transition-colors"
+          style={{ backgroundColor: "#2E7D60" }}
         >
           Ver catálogo
         </Link>
         <Link
           href="/registro"
-          className="border border-gray-300 text-gray-700 px-6 py-3 rounded-full font-medium hover:border-jade-500 hover:text-jade-600 transition-colors"
+          className="px-6 py-3 rounded-full font-semibold text-sm border border-gray-300 transition-colors"
+          style={{ color: "#374151" }}
         >
           Crear cuenta
         </Link>
