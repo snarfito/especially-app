@@ -14,9 +14,17 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { getCurrentUser, isAuthenticated } from "@/lib/auth";
-import type { Order, OrderStatus } from "@/types";
+import type { Order } from "@/types";
 
-const STATUS_LABELS: Record<OrderStatus, string> = {
+const STATUS_LABELS: Record<string, string> = {
+  // Valores que puede devolver el backend (Enum Python)
+  PENDING: "Pendiente",
+  ACCEPTED: "Aceptado",
+  IN_PRODUCTION: "En producción",
+  SHIPPED: "Enviado",
+  DELIVERED: "Entregado",
+  CANCELLED: "Cancelado",
+  // aliases en minúscula por compatibilidad
   pendiente: "Pendiente",
   aceptado: "Aceptado",
   en_produccion: "En producción",
@@ -25,7 +33,13 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   cancelado: "Cancelado",
 };
 
-const STATUS_COLORS: Record<OrderStatus, string> = {
+const STATUS_COLORS: Record<string, string> = {
+  PENDING: "bg-yellow-50 text-yellow-700",
+  ACCEPTED: "bg-blue-50 text-blue-700",
+  IN_PRODUCTION: "bg-purple-50 text-purple-700",
+  SHIPPED: "bg-indigo-50 text-indigo-700",
+  DELIVERED: "bg-green-50 text-green-700",
+  CANCELLED: "bg-red-50 text-red-700",
   pendiente: "bg-yellow-50 text-yellow-700",
   aceptado: "bg-blue-50 text-blue-700",
   en_produccion: "bg-purple-50 text-purple-700",
@@ -46,23 +60,27 @@ export default function DashboardPage() {
       return;
     }
     const user = getCurrentUser();
-    if (user?.role !== "socio_productor") {
+    if (
+      user?.user_role !== "socio_productor" &&
+      user?.user_role !== "seller"
+    ) {
       router.push("/catalogo");
       return;
     }
 
+    // El endpoint real es /orders/available (no /orders/seller/available)
     api
-      .get<Order[]>("/orders/seller/available")
+      .get<Order[]>("/orders/available")
       .then(setOrders)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [router]);
 
-  async function handleAccept(orderId: number) {
+  async function handleAccept(orderId: string) {
     try {
-      await api.post(`/orders/${orderId}/accept`, {});
+      const updated = await api.post<Order>(`/orders/${orderId}/accept`, {});
       setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: "aceptado" as OrderStatus } : o))
+        prev.map((o) => (o.order_id === orderId ? updated : o))
       );
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error al aceptar pedido");
@@ -94,24 +112,28 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-4">
           {orders.map((order) => (
             <div
-              key={order.id}
+              key={order.order_id}
               className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between"
             >
               <div className="flex flex-col gap-1">
-                <span className="font-medium text-gray-900">Pedido #{order.id}</span>
+                <span className="font-medium text-gray-900">
+                  Pedido #{order.order_id.slice(0, 8).toUpperCase()}
+                </span>
                 <span className="text-sm text-gray-500">
-                  Total: ${order.total_amount.toLocaleString("es-CO")}
+                  Total: ${Number(order.total_amount).toLocaleString("es-CO")}
                 </span>
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full w-fit font-medium ${STATUS_COLORS[order.status]}`}
+                  className={`text-xs px-2 py-0.5 rounded-full w-fit font-medium ${
+                    STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
+                  }`}
                 >
-                  {STATUS_LABELS[order.status]}
+                  {STATUS_LABELS[order.status] ?? order.status}
                 </span>
               </div>
 
-              {order.status === "pendiente" && (
+              {(order.status === "PENDING" || order.status === "pendiente") && (
                 <button
-                  onClick={() => handleAccept(order.id)}
+                  onClick={() => handleAccept(order.order_id)}
                   className="bg-jade-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-jade-600 transition-colors"
                 >
                   Aceptar pedido

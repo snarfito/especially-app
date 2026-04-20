@@ -16,14 +16,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { login } from "@/lib/auth";
-import type { UserRole } from "@/types";
 
 export default function RegistroPage() {
   const router = useRouter();
   const [fullName, setFullName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<UserRole>("comprador");
+  const [role, setRole] = useState<"buyer" | "seller">("buyer");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -32,9 +31,9 @@ export default function RegistroPage() {
     setError("");
     setLoading(true);
     try {
-      await api.post("/users/", { full_name: fullName, email, password, role });
+      await api.post("/users", { full_name: fullName, email, password, user_role: role });
       const data = await login({ email, password });
-      if (data.user.role === "socio_productor") {
+      if (data.user.user_role === "seller" || data.user.user_role === "socio_productor") {
         router.push("/dashboard");
       } else {
         router.push("/catalogo");
@@ -99,7 +98,7 @@ export default function RegistroPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Soy...</label>
             <div className="flex gap-3">
-              {(["comprador", "socio_productor"] as UserRole[]).map((r) => (
+              {(["buyer", "seller"] as const).map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -110,7 +109,7 @@ export default function RegistroPage() {
                       : "border-gray-300 text-gray-600 hover:border-jade-300"
                   }`}
                 >
-                  {r === "comprador" ? "Comprador" : "Socio Productor"}
+                  {r === "buyer" ? "Comprador" : "Socio Productor"}
                 </button>
               ))}
             </div>

@@ -21,7 +21,7 @@ export default function CatalogoPage() {
 
   useEffect(() => {
     api
-      .get<Product[]>("/products/")
+      .get<Product[]>("/products")
       .then(setProducts)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -56,24 +56,24 @@ export default function CatalogoPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <div
-              key={product.id}
+              key={product.product_id}
               className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="bg-gray-100 h-48 flex items-center justify-center text-gray-300 text-sm">
-                {product.image_url ? (
+                {product.images?.[0]?.url ? (
                   <img
-                    src={product.image_url}
+                    src={product.images[0].url}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  "Sin imagen"
+                  <span>Sin imagen</span>
                 )}
               </div>
               <div className="p-4">
                 <h3 className="font-medium text-gray-900 text-sm truncate">{product.name}</h3>
                 <p className="text-jade-600 font-bold mt-1">
-                  ${product.base_price.toLocaleString("es-CO")}
+                  ${Number(product.base_price).toLocaleString("es-CO")}
                 </p>
                 {product.is_customizable && (
                   <span className="inline-block mt-2 text-xs bg-jade-50 text-jade-700 px-2 py-0.5 rounded-full">

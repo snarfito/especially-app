@@ -29,7 +29,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await login({ email, password });
-      if (data.user.role === "socio_productor") {
+      if (data.user.user_role === "socio_productor" || data.user.user_role === "seller") {
         router.push("/dashboard");
       } else {
         router.push("/catalogo");

@@ -9,22 +9,41 @@
  */
 
 import { api } from "./api";
-import type { AuthResponse, LoginCredentials, User } from "@/types";
+import type { AuthResponse, TokenResponse, User } from "@/types";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
 
 /**
- * Inicia sesión contra el backend y almacena el token.
- *
- * Args:
- *   credentials: Email y password del usuario.
- *
- * Returns:
- *   El objeto AuthResponse con access_token y datos del usuario.
+ * Inicia sesión contra el backend usando el flujo OAuth2 password.
+ * El backend espera application/x-www-form-urlencoded en /token.
+ * Luego obtiene el perfil del usuario desde /users/me.
  */
-export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
-  const data = await api.post<AuthResponse>("/auth/login", credentials);
-  localStorage.setItem("access_token", data.access_token);
-  localStorage.setItem("user", JSON.stringify(data.user));
-  return data;
+export async function login(credentials: { email: string; password: string }): Promise<AuthResponse> {
+  // El endpoint /token usa OAuth2PasswordRequestForm → form-urlencoded
+  const formBody = new URLSearchParams({
+    username: credentials.email,
+    password: credentials.password,
+  });
+
+  const response = await fetch(`${API_URL}/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: formBody.toString(),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ detail: "Error de autenticación" }));
+    throw new Error(err.detail ?? `HTTP ${response.status}`);
+  }
+
+  const tokenData = (await response.json()) as TokenResponse;
+  localStorage.setItem("access_token", tokenData.access_token);
+
+  // Obtener perfil del usuario
+  const user = await api.get<User>("/users/me");
+  localStorage.setItem("user", JSON.stringify(user));
+
+  return { ...tokenData, user };
 }
 
 /**
@@ -37,9 +56,6 @@ export function logout(): void {
 
 /**
  * Retorna el usuario autenticado desde localStorage.
- *
- * Returns:
- *   El objeto User o null si no hay sesión activa.
  */
 export function getCurrentUser(): User | null {
   if (typeof window === "undefined") return null;
@@ -54,9 +70,6 @@ export function getCurrentUser(): User | null {
 
 /**
  * Verifica si hay una sesión activa.
- *
- * Returns:
- *   true si existe un token almacenado.
  */
 export function isAuthenticated(): boolean {
   if (typeof window === "undefined") return false;
