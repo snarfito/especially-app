@@ -8,7 +8,7 @@
  * Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
 
 /**
  * Obtiene el token JWT almacenado en localStorage.

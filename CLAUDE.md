@@ -71,6 +71,8 @@ cd frontend && npm run lint
 
 **Auth flow:** OAuth2 password → `POST /token` → JWT Bearer token. All protected routes use `Depends(get_current_user)`. Role enforcement via `Depends(require_role("seller"))`.
 
+**Local dev port:** the API runs on `http://localhost:8001` (frontend reads `NEXT_PUBLIC_API_URL` from `.env.local`). Start with `uvicorn app.main:app --reload --port 8001`.
+
 **Roles:** `buyer`, `socio_productor` (seller), `designer`.
 
 **Payments:** Wompi (Colombian gateway). `GET /payments/integrity-signature` returns SHA256 signature for the Wompi widget. `POST /payments/webhook` handles transaction events and updates order `payment_status`.
@@ -103,7 +105,7 @@ Local DB: `postgresql+psycopg://admin:password123@localhost:5432/especially_v1` 
 
 **Backend (`backend/.env`):** `DATABASE_URL`, `SECRET_KEY`, `ALGORITHM`, `ACCESS_TOKEN_EXPIRE_MINUTES`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL`, `WOMPI_PUBLIC_KEY`, `WOMPI_PRIVATE_KEY`, `WOMPI_INTEGRITY_SECRET`, `WOMPI_EVENTS_SECRET`.
 
-**Frontend (`frontend/.env.local`):** `NEXT_PUBLIC_API_URL=http://localhost:8000`.
+**Frontend (`frontend/.env.local`):** `NEXT_PUBLIC_API_URL=http://localhost:8001`.
 
 ## Code Documentation Standards
 
