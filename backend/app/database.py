@@ -2,7 +2,8 @@
 Especially API — Configuración de la base de datos.
 
 Responsabilidades:
-  - Crea el engine de SQLAlchemy apuntando a la URL de PostgreSQL definida en .env.
+  - Crea el engine de SQLAlchemy apuntando a la URL de PostgreSQL definida
+    en la configuración validada (``app.config.settings``).
   - Expone ``SessionLocal`` para la inyección de dependencias en FastAPI.
   - Define ``Base`` (DeclarativeBase) que importan todos los modelos ORM.
   - Provee ``get_db``, generador de sesión con cierre garantizado.
@@ -10,19 +11,16 @@ Responsabilidades:
 Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
 Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
 """
-import os
+# app/database.py
+from typing import Generator
 
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
-from typing import Generator
 
-load_dotenv()
+from .config import settings
 
-SQLALCHEMY_DATABASE_URL: str = os.getenv("DATABASE_URL", "")
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
