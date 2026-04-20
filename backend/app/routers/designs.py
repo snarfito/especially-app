@@ -22,7 +22,7 @@ from ..database import get_db
 from ..dependencies import get_current_user
 from ..models import User
 
-router = APIRouter(prefix="/designs", tags=["Diseños"])
+router: APIRouter = APIRouter(prefix="/designs", tags=["Diseños"])
 
 
 @router.post("", response_model=schemas.CustomDesign, status_code=201)

@@ -7,6 +7,7 @@ Endpoints:
 Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
 Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
 """
+# app/routers/stores.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -15,7 +16,7 @@ from ..database import get_db
 from ..dependencies import require_user_without_store
 from ..models import User
 
-router = APIRouter(prefix="/store", tags=["Socios"])
+router: APIRouter = APIRouter(prefix="/store", tags=["Socios"])
 
 
 @router.post("", response_model=schemas.StoreProfile, status_code=201)

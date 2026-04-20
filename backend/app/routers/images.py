@@ -1,24 +1,30 @@
+"""
+Especially API — Router de imágenes de productos.
+
+Endpoints:
+  POST   /products/{id}/images              → Sube una imagen al bucket R2 y la registra en DB.
+  GET    /products/{id}/images              → Lista las imágenes de un producto.
+  DELETE /products/{id}/images/{image_id}   → Elimina una imagen de R2 y de la DB.
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
+"""
 # app/routers/images.py
-"""
-Endpoints para subir y gestionar imágenes de productos.
-Las imágenes se almacenan en Cloudflare R2 y sus URLs en product_images.
-"""
+from typing import List, Set
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, Form
 from sqlalchemy.orm import Session
-from typing import List
 
-from .. import crud, schemas
+from .. import crud, schemas, storage
 from ..database import get_db
-from ..dependencies import get_owned_product, require_store_owner
-from ..models import Product, StoreProfile
-from .. import storage
+from ..dependencies import get_owned_product
+from ..models import Product
 
-router = APIRouter(prefix="/products", tags=["Imágenes de productos"])
+router: APIRouter = APIRouter(prefix="/products", tags=["Imágenes de productos"])
 
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+ALLOWED_CONTENT_TYPES: Set[str] = {"image/jpeg", "image/png", "image/webp"}
+MAX_FILE_SIZE: int = 5 * 1024 * 1024  # 5 MB
 
 
 @router.post("/{product_id}/images", response_model=schemas.ProductImage, status_code=201)

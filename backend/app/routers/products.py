@@ -11,6 +11,7 @@ Endpoints:
 Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
 Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
 """
+# app/routers/products.py
 from typing import List, Optional
 from uuid import UUID
 
@@ -22,7 +23,7 @@ from ..database import get_db
 from ..dependencies import get_owned_product, require_store_owner
 from ..models import Product, StoreProfile
 
-router = APIRouter(prefix="/products", tags=["Marketplace"])
+router: APIRouter = APIRouter(prefix="/products", tags=["Marketplace"])
 
 @router.get("", response_model=List[schemas.Product])
 def list_products(

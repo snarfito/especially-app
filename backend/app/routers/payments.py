@@ -1,11 +1,14 @@
-# app/routers/payments.py
 """
-Integración con Wompi — pasarela de pagos colombiana.
+Especially API — Router de pagos (integración Wompi).
 
 Endpoints:
-  GET  /payments/integrity-signature  →  Genera la firma SHA256 para el widget
-  POST /payments/webhook              →  Recibe eventos de Wompi (transacción aprobada/rechazada)
+  GET  /payments/integrity-signature  → Genera la firma SHA256 para el widget de pago.
+  POST /payments/webhook              → Recibe eventos de Wompi (transacción aprobada/rechazada).
+
+Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
+Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
 """
+# app/routers/payments.py
 import hashlib
 import hmac
 from uuid import UUID
@@ -18,7 +21,7 @@ from ..dependencies import get_current_user
 from .. import crud, models, schemas
 from ..config import settings
 
-router = APIRouter(prefix="/payments", tags=["payments"])
+router: APIRouter = APIRouter(prefix="/payments", tags=["Pagos"])
 
 
 # ─── 1. Firma de integridad ───────────────────────────────────────────────────

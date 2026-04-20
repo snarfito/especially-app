@@ -10,15 +10,16 @@ Responsabilidades:
 Desarrollador: Fredy Hortua <fredy.hortua@gmail.com>
 Proyecto:      Especially — Marketplace colombiano de personalización y artesanías
 """
+# app/main.py
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from . import crud
 from .database import get_db
 from .routers import auth, designs, images, orders, payments, products, stores
 
-app = FastAPI(
+app: FastAPI = FastAPI(
     title="Especially API",
     description="Plataforma de personalización y marketplace de artesanías colombianas 🌿",
     version="1.0.0",
@@ -47,6 +48,7 @@ app.include_router(payments.router)
 
 @app.get("/", tags=["General"])
 def read_root():
+    """Devuelve el mensaje de bienvenida de la API."""
     return {"message": "Bienvenido a la API de Especially 🌿"}
 
 
@@ -54,7 +56,7 @@ def read_root():
 def health_check(db: Session = Depends(get_db)):
     """Devuelve el estado de salud de la API y de la base de datos."""
     try:
-        db.execute(text("SELECT 1"))
+        crud.ping_database(db)
         return {"status": "online", "database": "connected"}
     except Exception as e:
         raise HTTPException(

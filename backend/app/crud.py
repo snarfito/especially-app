@@ -232,9 +232,21 @@ def create_order(
     order_data: schemas.OrderCreate,
     buyer_id: UUID,
 ) -> models.Order:
-    """
-    Crea una orden con sus items. Calcula el total sumando
-    base_price * quantity de cada producto en la DB (nunca confía en el cliente).
+    """Crea una orden con sus ítems, calculando el total desde la base de datos.
+
+    El precio unitario se lee siempre desde ``products.base_price``; el cliente
+    nunca envía precios para evitar manipulación.
+
+    Args:
+        db: Sesión activa de SQLAlchemy.
+        order_data: Datos de la orden con la lista de ítems.
+        buyer_id: UUID del comprador que realiza el pedido.
+
+    Returns:
+        Instancia de ``Order`` recién creada con sus ítems persistidos.
+
+    Raises:
+        ValueError: Si algún ``product_id`` referenciado no existe en la DB.
     """
     total = Decimal("0")
     items_to_create = []
@@ -316,7 +328,15 @@ def get_order_by_id(db: Session, order_id: UUID) -> Optional[models.Order]:
 
 
 def get_pending_orders(db: Session) -> List[models.Order]:
-    """Devuelve pedidos pendientes sin un socio asignado."""
+    """Devuelve pedidos pendientes sin un socio productor asignado.
+
+    Args:
+        db: Sesión activa de SQLAlchemy.
+
+    Returns:
+        Lista de instancias de ``Order`` en estado PENDING y sin ``seller_id``,
+        ordenadas por fecha de creación descendente.
+    """
     return (
         db.query(models.Order)
         .filter(models.Order.status == models.OrderStatus.PENDING)
@@ -450,7 +470,18 @@ def get_order_by_payment_reference(
     db: Session,
     reference: str,
 ) -> Optional[models.Order]:
-    """Busca una orden por su referencia única de pago (usada por el webhook de Wompi)."""
+    """Busca una orden por su referencia única de pago.
+
+    Usada principalmente por el webhook de Wompi para identificar a qué
+    orden corresponde una transacción entrante.
+
+    Args:
+        db: Sesión activa de SQLAlchemy.
+        reference: Cadena de referencia única generada al crear la orden (e.g. ``ESP-XXXXXXXXXXXX``).
+
+    Returns:
+        Instancia de ``Order`` si existe, ``None`` en caso contrario.
+    """
     return db.query(models.Order).filter(
         models.Order.payment_reference == reference
     ).first()
@@ -462,7 +493,17 @@ def update_order_payment(
     payment_status: str,
     wompi_transaction_id: Optional[str] = None,
 ) -> models.Order:
-    """Actualiza el estado de pago de la orden tras recibir el evento de Wompi."""
+    """Actualiza el estado de pago de la orden tras recibir un evento de Wompi.
+
+    Args:
+        db: Sesión activa de SQLAlchemy.
+        order: Instancia ORM de la orden a actualizar.
+        payment_status: Nuevo estado de pago (``"pagado"``, ``"pago_fallido"``, etc.).
+        wompi_transaction_id: ID de transacción devuelto por Wompi (opcional).
+
+    Returns:
+        Instancia de ``Order`` con el estado de pago actualizado.
+    """
     order.payment_status = payment_status
     if wompi_transaction_id:
         order.wompi_transaction_id = wompi_transaction_id
@@ -552,3 +593,22 @@ def delete_product_image(db: Session, image: models.ProductImage) -> None:
     """
     db.delete(image)
     db.commit()
+
+
+# ─── INFRAESTRUCTURA ──────────────────────────────────────────────────────────
+
+def ping_database(db: Session) -> bool:
+    """Ejecuta una consulta mínima para verificar la conectividad con la base de datos.
+
+    Args:
+        db: Sesión activa de SQLAlchemy.
+
+    Returns:
+        ``True`` si la conexión responde correctamente.
+
+    Raises:
+        Exception: Propaga cualquier error de conexión para que el caller lo gestione.
+    """
+    from sqlalchemy import text
+    db.execute(text("SELECT 1"))
+    return True

@@ -32,7 +32,7 @@ from ..models import Order, OrderStatus, StoreProfile, User
 from ..pdf_generator import generate_spec_pdf
 from ..storage import upload_file
 
-router = APIRouter(prefix="/orders", tags=["Pedidos"])
+router: APIRouter = APIRouter(prefix="/orders", tags=["Pedidos"])
 
 
 @router.post("", response_model=schemas.Order, status_code=201)
